@@ -1,7 +1,7 @@
 # LocalMix
 iOS and Android app
 
-LocalMix is an iOS and Android app written by Joshua O'Connor in the Summer of 2015.  It is written in HTML5, CSS3, Javascript, and JQuery Mobile.  It pulls data from Eventful's API.
+LocalMix is an iOS and Android app written by Joshua O'Connor in the Summer of 2015 as a class project for UC San Diego's Mobile Application Development Program.  It is written in HTML5, CSS3, Javascript, and JQuery Mobile.  It pulls data from Eventful's API.
 
 **DISCLAIMER:  The API Key required to access Eventful's database has been removed from this project.  To have the app fully functional, obtain an API key from Eventful:  http://api.eventful.com/
 
