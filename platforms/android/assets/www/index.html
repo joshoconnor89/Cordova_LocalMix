@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<!--The following script tag downloads a font from the Adobe Edge Web Fonts server for use within the web page. We recommend that you do not modify it.-->
+<script>var __adobewebfontsappname__="dreamweaver"</script>
+<script src="http://use.edgefonts.net/revalia:n4:default;patrick-hand:n4:default.js" type="text/javascript"></script>
+
+<script>
+
+$( document ).ready(function() {
+    console.log( "ready!" );
+    $spinner = $('#loadingSpinner');
+    $spinner.hide();
+
+});
+
+</script>
+
+
+<script src="cordova.js"></script>
+<script type="text/javascript">
+
+//prevents bug in android when enter is pressed.
+function enterpressalert(e, textarea){
+var code = (e.keyCode ? e.keyCode : e.which);
+if(code == 13) { //Enter keycode
+ console.log("enter pressed!")
+}
+}
+
+
+
+window.addEventListener('load', function () {
+  $(document).on('click', 'a[target="_system"],a[target="_blank"]', function (e) {
+    e.preventDefault();
+    var url = this.href;
+    window.open(url,"_system");
+  });
+}, false);
+</script>
+
+<!-- jQuery required files -->
+<link rel="stylesheet" href="css/themes/subtle.min.css" />
+<link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" /><!--Standard jquery mobile-->
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+
+<style>
+
+h2 {
+  color: #234860;
+  text-align: center;
+}
+
+p {
+  padding-left:10px;
+  padding-right:10px;
+  font-family: patrick-hand;
+  font-size:20px;
+}
+
+.spinner {
+
+z-index:1;
+position:absolute;
+width: 100%;
+left:auto;
+
+
+}
+
+
+</style>
+
+</head>
+
+
+<script type="text/javascript" src="http://api.eventful.com/js/api">
+
+</script>
+
+<script type="text/javascript">
+
+
+function loaddata()
+
+{
+$spinner = $('#loadingSpinner');
+$spinner.show();
+
+
+   //get variables
+
+   //Grab todays date 
+   var today = new Date();
+   var dd = today.getDate();
+   var mm = today.getMonth()+1; //January is 0!
+   var yyyy = today.getFullYear();
+
+
+
+    if(dd<10) {
+    dd='0'+dd
+    } 
+
+    if(mm<10) {
+    mm='0'+mm
+    } 
+
+    //last two digits (00) are ignored by Eventful
+    currentday = yyyy + mm + dd + "00"
+  
+
+    //console.log(today);
+
+   //Grab event type gathered from user input.
+   var eventType = document.getElementById('eventType').value;
+   console.log(eventType)
+
+   //Grab user's location from user input.
+   var zip = document.getElementById('location').value;
+   console.log(zip)
+
+
+   //Variable to fetch data from API.
+
+   var oArgs = {
+
+      app_key: //DELETED DUE TO EVENTFUL (API SOURCE) TERMS OF USE.  TO BE FUNCTIONAL, OBTAIN AN API KEY FROM EVENTFUL.
+
+      q: eventType,
+
+      where: zip,
+
+      "date": currentday + "-" +currentday,
+
+      page_size: 50,
+
+      sort_order: "relevance",
+
+   };
+
+   //Chop up our data.
+   var content = '';
+   var list = '';
+
+
+   EVDB.API.call("/events/search", oArgs, function(oData) {
+  $spinner = $('#loadingSpinner');
+  $spinner.hide();
+    
+
+
+   //NO DATA FOUND 
+   if (oData.events == null) {
+     console.log("nothing here")
+     alert("No results found.");
+
+   } else{
+
+
+   //ONLY ONE RECORD FOUND
+    if (oData.events.event[0] == null) {
+
+       var eventTitle = oData.events.event.title
+       //console.log("Event title " +eventTitle)
+       var eventURL = oData.events.event.url
+       //console.log("Event URL " +eventURL)
+       var eventDescription = oData.events.event.description
+       //console.log("Event Description " +eventDescription)
+       var eventLatitude = oData.events.event.latitude
+       //console.log("Event Latitude " +eventLatitude)
+       var eventLongitude = oData.events.event.longitude
+       //console.log("Event Longitude " +eventLongitude)
+       var eventStartTime= oData.events.event.start_time
+       //console.log("Event Start Time " +eventStartTime)
+       var eventVenueAddress= oData.events.event.venue_address
+       //console.log("Event Venue Address " +eventVenueAddress)
+       var eventVenueName= oData.events.event.venue_name
+
+
+
+
+       //Get our date
+       console.log(eventStartTime)
+       var eventYear = eventStartTime.substring(0,4)
+       console.log(eventYear)
+
+       var eventMonth = eventStartTime.substring(5,7)
+       console.log(eventMonth)
+
+       var eventDay = eventStartTime.substring(8,10)
+       console.log(eventDay)
+
+       var eventDate = eventMonth + '/' + eventDay + '/' + eventYear 
+       console.log(eventDate)
+
+
+
+
+
+       //Get our time
+       var eventTime = eventStartTime.substring(11,19)
+       console.log(eventTime)
+       //CONVERT THIS TO STANDARD TIME
+       var time = eventTime.split(':');
+
+      var hours = Number(time[0]);
+      var minutes = Number(time[1]);
+      var seconds = Number(time[2]);
+
+      var timeValue = "" + ((hours >12) ? hours - 12 : hours);
+      timeValue += (minutes < 10) ? ":0" + minutes : ":" + minutes;
+      timeValue += (seconds < 10) ? ":0" + seconds : ":" + seconds;
+      timeValue += (hours >= 12) ? " P.M." : " A.M.";
+
+      if (timeValue.substring(0,2) == 10) {
+      console.log(timeValue)
+      var standardTime = timeValue.substring(0,5)
+      console.log(standardTime)
+      var amOrPM = timeValue.substring(8,13)
+      console.log(amOrPM)
+
+      var eventTimeStandardTime = standardTime + ' ' + amOrPM
+      console.log(eventTimeStandardTime)
+      }
+
+      else if (timeValue.substring(0,2) == 11) {
+      console.log(timeValue)
+      var standardTime = timeValue.substring(0,5)
+      console.log(standardTime)
+      var amOrPM = timeValue.substring(8,13)
+      console.log(amOrPM)
+
+      var eventTimeStandardTime = standardTime + ' ' + amOrPM
+      console.log(eventTimeStandardTime)
+      }
+
+      else if (timeValue.substring(0,2) == 12) {
+      console.log(timeValue)
+      var standardTime = timeValue.substring(0,5)
+      console.log(standardTime)
+      var amOrPM = timeValue.substring(8,13)
+      console.log(amOrPM)
+
+      var eventTimeStandardTime = standardTime + ' ' + amOrPM
+      console.log(eventTimeStandardTime)
+      }
+
+      else {
+      console.log(timeValue)
+      var standardTime = timeValue.substring(0,4)
+      console.log(standardTime)
+      var amOrPM = timeValue.substring(8,13)
+      console.log(amOrPM)
+
+      var eventTimeStandardTime = standardTime + ' ' + amOrPM
+      console.log(eventTimeStandardTime)
+      }
+
+
+
+
+
+       if (oData.events.event.image == null) {
+           console.log("no image!")
+           var eventPhoto = '<img src = "http://www.cdjapan.co.jp/icons/no_image.gif" height="100" width="100" style="display:block; margin-left:auto; margin-right:auto;  padding-top: 15px;">'
+
+       //If there is an image from database
+       } else {
+           var eventPhotoURL= oData.events.event.image.medium.url
+
+           var highQualityPhoto = eventPhotoURL.replace("medium", "edpborder500")
+
+           var eventPhoto = '<img src = "' + highQualityPhoto +'" height="300" width="300" style="display:block; margin-left:auto; margin-right:auto;">'
+
+           console.log("Event Photo " +eventPhoto)
+       }
+
+
+
+
+       
+
+       //Content to be added to the screen.
+       content += '<hr><h2>' +eventTitle +'</h2>' + '<p>' + 'Date: ' + eventDate  + '</p><p>'  + 'Time: ' + eventTimeStandardTime + '</p><p>' + 'Venue: ' + eventVenueName + '</p><p>' + 'Address: ' + eventVenueAddress + ', ' +eventCityName + ', ' +regionAbbr + '</p><p>' + eventPhoto + '</p><p>' + eventDescription + '</p>' ;
+
+
+       filteredContent = content.replace(/\bnull\b/g, 'No information provided.').replace(' 0:00 A.M.', ' No time provided.').replace(' 0:00 P.M.', ' No time provided.').replace(', undefined', '').replace(', undefined', '');
+
+       //Add content to html.
+       $("#ListItems").html(filteredContent);
+
+
+
+
+
+   //MORE THAN ONE RECORD FOUND
+   } else {
+
+
+   var numberofevents = oData.events.event.length;
+   console.log("there are " + numberofevents +" events!");
+
+   console.log(oData)
+
+
+    //Our Event Data:
+    for (var a=0;a<numberofevents;a++){
+       var eventTitle = oData.events.event[a].title
+       //console.log("Event title " +eventTitle)
+       var eventURL = oData.events.event[a].url
+       //console.log("Event URL " +eventURL)
+       var eventDescription = oData.events.event[a].description
+       //console.log("Event Description " +eventDescription)
+       var eventLatitude = oData.events.event[a].latitude
+       //console.log("Event Latitude " +eventLatitude)
+       var eventLongitude = oData.events.event[a].longitude
+       //console.log("Event Longitude " +eventLongitude)
+       var eventStartTime= oData.events.event[a].start_time
+       //console.log("Event Start Time " +eventStartTime)
+       var eventCityName= oData.events.event[a].city_name
+       //console.log("Event City Name " +eventCityName)
+       var regionAbbr= oData.events.event[a].region_abbr
+       //console.log("Event State Abbr " +regionAbbr)
+
+
+       //Get our date
+       console.log(eventStartTime)
+       var eventYear = eventStartTime.substring(0,4)
+       console.log(eventYear)
+
+       var eventMonth = eventStartTime.substring(5,7)
+       console.log(eventMonth)
+
+       var eventDay = eventStartTime.substring(8,10)
+       console.log(eventDay)
+
+       var eventDate = eventMonth + '/' + eventDay + '/' + eventYear 
+       console.log(eventDate)
+
+
+
+
+
+       //Get our time
+       var eventTime = eventStartTime.substring(11,19)
+       console.log(eventTime)
+       //CONVERT THIS TO STANDARD TIME
+       var time = eventTime.split(':');
+
+      var hours = Number(time[0]);
+      var minutes = Number(time[1]);
+      var seconds = Number(time[2]);
+
+      var timeValue = "" + ((hours >12) ? hours - 12 : hours);
+      timeValue += (minutes < 10) ? ":0" + minutes : ":" + minutes;
+      timeValue += (seconds < 10) ? ":0" + seconds : ":" + seconds;
+      timeValue += (hours >= 12) ? " P.M." : " A.M.";
+
+      if (timeValue.substring(0,2) == 10) {
+      console.log(timeValue)
+      var standardTime = timeValue.substring(0,5)
+      console.log(standardTime)
+      var amOrPM = timeValue.substring(8,13)
+      console.log(amOrPM)
+
+      var eventTimeStandardTime = standardTime + ' ' + amOrPM
+      console.log(eventTimeStandardTime)
+      }
+
+      else if (timeValue.substring(0,2) == 11) {
+      console.log(timeValue)
+      var standardTime = timeValue.substring(0,5)
+      console.log(standardTime)
+      var amOrPM = timeValue.substring(8,13)
+      console.log(amOrPM)
+
+      var eventTimeStandardTime = standardTime + ' ' + amOrPM
+      console.log(eventTimeStandardTime)
+      }
+
+      else if (timeValue.substring(0,2) == 12) {
+      console.log(timeValue)
+      var standardTime = timeValue.substring(0,5)
+      console.log(standardTime)
+      var amOrPM = timeValue.substring(8,13)
+      console.log(amOrPM)
+
+      var eventTimeStandardTime = standardTime + ' ' + amOrPM
+      console.log(eventTimeStandardTime)
+      }
+
+      else {
+      console.log(timeValue)
+      var standardTime = timeValue.substring(0,4)
+      console.log(standardTime)
+      var amOrPM = timeValue.substring(8,13)
+      console.log(amOrPM)
+
+      var eventTimeStandardTime = standardTime + ' ' + amOrPM
+      console.log(eventTimeStandardTime)
+      }
+
+
+
+       var eventVenueAddress= oData.events.event[a].venue_address
+       //console.log("Event Venue Address " +eventVenueAddress)
+       var eventVenueName= oData.events.event[a].venue_name
+       //console.log("Event Venue Name " +eventVenueName)
+
+
+       //If conditional handles error handling.
+       //If there is no image from database (image == null)
+       if (oData.events.event[a].image == null) {
+           console.log("no image!")
+           var eventPhoto = '<img src = "http://www.cdjapan.co.jp/icons/no_image.gif" height="100" width="100" style="display:block; margin-left:auto; margin-right:auto;  padding-top: 15px;">'
+
+       //If there is an image from database
+       } else {
+           var eventPhotoURL= oData.events.event[a].image.medium.url
+
+           var highQualityPhoto = eventPhotoURL.replace("medium", "edpborder500")
+
+           var eventPhoto = '<img src = "' + highQualityPhoto +'" height="300" width="300" style="display:block; margin-left:auto; margin-right:auto;">'
+
+           console.log("Event Photo " +eventPhoto)
+
+
+
+       }
+
+       //list += '<li><a href="#' + a + '">' + eventTitle +'</a></li>'
+
+
+       //Content to be added to the screen.
+       content += '<hr><h2>' +eventTitle +'</h2>' + '<p>' + 'Date: ' + eventDate  + '</p><p>'  + 'Time: ' + eventTimeStandardTime + '</p><p>' + 'Venue: ' + eventVenueName + '</p><p>' + 'Address: ' + eventVenueAddress + ', ' +eventCityName + ', ' +regionAbbr + '</p><p>' + eventPhoto + '</p><p>' + eventDescription + '</p>' ;
+
+
+       //Get rid of any data that says 'null', or time set to '0:00'
+      filteredContent = content.replace(/\bnull\b/g, 'No information provided.').replace(' 0:00 A.M.', ' No time provided.').replace(' 0:00 P.M.', ' No time provided.').replace(', undefined', '').replace(', undefined', '');
+
+       //Add content to html.
+       $("#ListItems").html(filteredContent);
+       //$("#List").html(list);
+     }
+     }
+   }
+    });
+
+   $spinner.show();
+}
+
+
+</script>
+
+
+
+<body>
+
+
+
+
+<!-- /PAGE 1, HOME PAGE-->
+<div id="main" data-role="page">
+<div data-role="header" data-position="fixed">
+
+<p style="text-align: center; font-family: patrick-hand; margin-top: 20px; font-style: normal; font-weight: 400; font-size: 55px;">LocalMix<p>
+<form>
+<p style="text-align:center; font-family: Helvetica; margin-top:-50px; font-size: 15px; padding-bottom: 10px">Let's find something to do today!</p>
+</div>
+
+<div style="width:90%; padding-top:10px; display:block; margin-left:auto; margin-right:auto;">
+<label for="zip"><span style="font-family: Helvetica; font-size: 20px; margin-left: 10px; ">City:</span><input type = "text" id = "location" onKeyPress="enterpressalert(event, this)"/></label><br>
+</div>
+
+
+
+<div style="z-index:10;position: absolute; left: 50%;" id="loadingSpinner">
+<div style="position: relative; left: -50%;">
+<img src="http://www.audiomicro.com/ajax-player/ajaxSpinner.gif" style= "height: 200px; width: 200px;">
+</div>
+</div>
+
+
+<div style="width:90%; display:block; margin-left:auto; margin-right:auto;">
+<span style="font-family: Helvetica; font-size: 20px; margin-left: 10px; ">Category:</span>
+<select id="eventType">
+<option value="Concerts">Concerts</option>
+<option value="Food">Food/Drink</option>
+<option value="Nightlife">Nightlife</option>
+<option value="Festivals">Festivals</option>
+<option value="Sports">Sports</option>
+<option value="Outdoor">Outdoor</option>
+<option value="Family">Family</option>
+<option value="Pets">Pets</option>
+<option value="Health">Health</option>
+<option value="Education">Education</option>
+<option value="Comedy">Comedy</option>
+<option value="Film">Film</option>
+
+</select>
+</div>
+<!--<input type = "hidden" id="count" value="5"/>example of hiddens fields
+<input type = "hidden" id="output" value="full"/>-->
+
+<br>
+
+<div style="width:50%; display:block; margin-left:auto; margin-right:auto;">
+<input type = "button" value="search" style="background-color: grey; display: block; margin-left:auto; margin-right:auto;"onclick="loaddata();"/>
+</form>
+</div>
+<br><br>
+
+
+
+
+
+
+<span id = "List"></span>
+
+
+
+<span id = "ListItems"></span>
+
+
+
+
+<hr>
+<div class="eventful-badge eventful-large">
+  <img src="http://api.eventful.com/images/powered/eventful_139x44.gif"
+    alt="Local Events, Concerts, Tickets" style="display:block; margin-left:auto; margin-right:auto;">
+  <p style="text-align:center;"><a href="http://eventful.com/" target="_blank">Events</a> by Eventful</p>
+</div>
+</div>
+<!-- END PAGE -->
+
+
+
+
+
+
+</body>
+
+</html>
+
